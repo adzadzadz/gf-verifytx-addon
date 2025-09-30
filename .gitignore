@@ -7,6 +7,7 @@ cache/
 
 # Development
 node_modules/
+temp/
 .vscode/
 .env
 .env.local
