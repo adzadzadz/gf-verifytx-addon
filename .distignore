@@ -1,0 +1,80 @@
+# Files and directories to exclude from distribution builds
+
+# Development files
+.git
+.github
+.gitignore
+.distignore
+.editorconfig
+.eslintrc
+.prettierrc
+
+# Test files
+tests/
+phpunit.xml
+phpunit.xml.dist
+codecov.yml
+.phpunit.result.cache
+
+# Build tools
+composer.json
+composer.lock
+package.json
+package-lock.json
+webpack.config.js
+gulpfile.js
+Gruntfile.js
+
+# Development dependencies
+vendor/
+node_modules/
+
+# IDE files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Documentation
+*.md
+!README.md
+CONTRIBUTING.md
+CODE_OF_CONDUCT.md
+
+# Temporary files
+temp/
+tmp/
+*.tmp
+*.bak
+*.swp
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Build artifacts
+build/
+dist/
+coverage/
+*.zip
+
+# Local config
+.env
+.env.local
+wp-config.php
+
+# Cache
+cache/
+logs/
+
+# PHPStan
+phpstan.neon
+phpstan.neon.dist
+
+# PHP CS
+.php-cs-fixer.php
+.php-cs-fixer.dist.php
+.phpcs.xml
+phpcs.xml

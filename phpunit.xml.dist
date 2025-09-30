@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.5/phpunit.xsd"
+         bootstrap="tests/bootstrap.php"
+         colors="true"
+         convertErrorsToExceptions="true"
+         convertNoticesToExceptions="true"
+         convertWarningsToExceptions="true"
+         processIsolation="false"
+         stopOnFailure="false"
+         verbose="true">
+    <testsuites>
+        <testsuite name="Unit">
+            <directory suffix="Test.php">tests/Unit</directory>
+        </testsuite>
+        <testsuite name="Integration">
+            <directory suffix="Test.php">tests/Integration</directory>
+        </testsuite>
+    </testsuites>
+
+    <coverage processUncoveredFiles="true">
+        <include>
+            <directory suffix=".php">includes</directory>
+            <file>class-gf-verifytx.php</file>
+            <file>gf-verifytx-addon.php</file>
+        </include>
+        <exclude>
+            <directory>tests</directory>
+            <directory>vendor</directory>
+            <directory>node_modules</directory>
+            <directory>assets</directory>
+            <directory>languages</directory>
+        </exclude>
+        <report>
+            <html outputDirectory="coverage" lowUpperBound="35" highLowerBound="70"/>
+            <text outputFile="coverage.txt" showUncoveredFiles="true"/>
+            <clover outputFile="coverage.xml"/>
+        </report>
+    </coverage>
+
+    <php>
+        <const name="WP_TESTS_PHPUNIT_POLYFILLS_PATH" value="vendor/yoast/phpunit-polyfills"/>
+        <const name="GF_VERIFYTX_TEST_MODE" value="true"/>
+        <env name="WP_ENVIRONMENT_TYPE" value="testing"/>
+    </php>
+</phpunit>

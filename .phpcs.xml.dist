@@ -1,0 +1,90 @@
+<?xml version="1.0"?>
+<ruleset name="GF VerifyTX Addon Coding Standards">
+    <description>Coding standards for GF VerifyTX Addon plugin</description>
+
+    <!-- Files to check -->
+    <file>.</file>
+
+    <!-- Exclude paths -->
+    <exclude-pattern>*/vendor/*</exclude-pattern>
+    <exclude-pattern>*/node_modules/*</exclude-pattern>
+    <exclude-pattern>*/tests/*</exclude-pattern>
+    <exclude-pattern>*/build/*</exclude-pattern>
+    <exclude-pattern>*/coverage/*</exclude-pattern>
+    <exclude-pattern>*/temp/*</exclude-pattern>
+    <exclude-pattern>*/logs/*</exclude-pattern>
+    <exclude-pattern>*/cache/*</exclude-pattern>
+    <exclude-pattern>*.min.js</exclude-pattern>
+    <exclude-pattern>*.min.css</exclude-pattern>
+
+    <!-- Use WordPress coding standards -->
+    <rule ref="WordPress">
+        <!-- Allow short array syntax -->
+        <exclude name="Generic.Arrays.DisallowShortArraySyntax.Found"/>
+
+        <!-- Allow class files without file comment -->
+        <exclude name="Squiz.Commenting.FileComment.Missing"/>
+
+        <!-- Don't require space after cast -->
+        <exclude name="WordPress.WhiteSpace.CastStructureSpacing.NoSpaceBeforeOpenParenthesis"/>
+
+        <!-- Allow Yoda conditions to be optional -->
+        <exclude name="WordPress.PHP.YodaConditions.NotYoda"/>
+    </rule>
+
+    <!-- Enforce PSR-4 autoloading standard for classes -->
+    <rule ref="PSR1.Classes.ClassDeclaration"/>
+
+    <!-- PHP compatibility -->
+    <config name="testVersion" value="7.4-"/>
+    <rule ref="PHPCompatibilityWP"/>
+
+    <!-- Minimum PHP version -->
+    <config name="minimum_supported_wp_version" value="5.0"/>
+
+    <!-- Text domain -->
+    <rule ref="WordPress.WP.I18n">
+        <properties>
+            <property name="text_domain" type="array">
+                <element value="gf-verifytx"/>
+            </property>
+        </properties>
+    </rule>
+
+    <!-- Prefixes -->
+    <rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+        <properties>
+            <property name="prefixes" type="array">
+                <element value="gf_verifytx"/>
+                <element value="GF_VerifyTX"/>
+            </property>
+        </properties>
+    </rule>
+
+    <!-- Security -->
+    <rule ref="WordPress.Security.EscapeOutput"/>
+    <rule ref="WordPress.Security.NonceVerification"/>
+    <rule ref="WordPress.Security.ValidatedSanitizedInput"/>
+
+    <!-- Database -->
+    <rule ref="WordPress.DB.DirectDatabaseQuery">
+        <exclude-pattern>*/includes/class-verification.php</exclude-pattern>
+    </rule>
+    <rule ref="WordPress.DB.PreparedSQL"/>
+    <rule ref="WordPress.DB.PreparedSQLPlaceholders"/>
+
+    <!-- Allow some flexibility in array indentation -->
+    <rule ref="Generic.Arrays.ArrayIndent">
+        <properties>
+            <property name="indent" value="4"/>
+        </properties>
+    </rule>
+
+    <!-- Set line length limits -->
+    <rule ref="Generic.Files.LineLength">
+        <properties>
+            <property name="lineLimit" value="150"/>
+            <property name="absoluteLineLimit" value="200"/>
+        </properties>
+    </rule>
+</ruleset>

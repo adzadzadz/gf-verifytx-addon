@@ -1,0 +1,53 @@
+includes:
+    - vendor/szepeviktor/phpstan-wordpress/extension.neon
+
+parameters:
+    level: 5
+    paths:
+        - gf-verifytx-addon.php
+        - class-gf-verifytx.php
+        - includes/
+
+    excludePaths:
+        - tests/
+        - vendor/
+        - node_modules/
+
+    bootstrapFiles:
+        - tests/bootstrap.php
+
+    inferPrivatePropertyTypeFromConstructor: true
+    treatPhpDocTypesAsCertain: false
+
+    ignoreErrors:
+        # Ignore WordPress global variables
+        - '#^Variable \$wpdb might not be defined#'
+        - '#^Call to an undefined method GFAddOn::#'
+        - '#^Call to an undefined method GF_Field::#'
+        - '#^Access to an undefined property GF_#'
+        - '#^Class GFForms not found#'
+        - '#^Class GF_Fields not found#'
+        - '#^Function __ not found#'
+        - '#^Function esc_html__ not found#'
+        - '#^Function wp_#'
+        - '#^Function get_option not found#'
+        - '#^Function add_action not found#'
+        - '#^Function add_filter not found#'
+        - '#^Function do_action not found#'
+        - '#^Function apply_filters not found#'
+        - '#^Function current_time not found#'
+        - '#^Function is_wp_error not found#'
+        - '#^Call to static method register\(\) on an unknown class GF_Fields#'
+
+    scanDirectories:
+        - ../../../wp-includes
+        - ../../../wp-admin
+
+    dynamicConstantNames:
+        - ABSPATH
+        - WP_DEBUG
+        - WP_CONTENT_DIR
+        - WP_PLUGIN_DIR
+        - GF_VERIFYTX_VERSION
+        - GF_VERIFYTX_PLUGIN_PATH
+        - GF_VERIFYTX_PLUGIN_URL
