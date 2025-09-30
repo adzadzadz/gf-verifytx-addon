@@ -315,7 +315,7 @@ class GF_VerifyTX extends GFAddOn {
 						'name'    => 'field_map',
 						'label'   => esc_html__( 'Map Form Fields to VerifyTX', 'gf-verifytx' ),
 						'type'    => 'field_map',
-						'field_map' => $this->get_field_map_choices( $form ),
+						'field_map' => $this->verifytx_field_map_choices( $form ),
 						'tooltip' => esc_html__( 'Map your form fields to VerifyTX API parameters.', 'gf-verifytx' ),
 					),
 				),
@@ -324,12 +324,12 @@ class GF_VerifyTX extends GFAddOn {
 	}
 
 	/**
-	 * Get field mapping choices.
+	 * Get field mapping choices for form settings.
 	 *
 	 * @param array $form The form object.
 	 * @return array
 	 */
-	private function get_field_map_choices( $form ) {
+	private function verifytx_field_map_choices( $form ) {
 		return array(
 			array(
 				'name'     => 'patient_first_name',
