@@ -9,6 +9,7 @@ define('ABSPATH', dirname(__DIR__) . '/');
 // Define plugin constants
 define('GF_VERIFYTX_PLUGIN_PATH', dirname(__DIR__) . '/');
 define('GF_VERIFYTX_VERSION', '0.1.0');
+define('GF_VERIFYTX_MIN_GF_VERSION', '2.5');
 
 // Mock WordPress functions
 if (!function_exists('__')) {
@@ -126,30 +127,44 @@ if (!function_exists('apply_filters')) {
 }
 
 // Mock global $wpdb
+class MockWPDB {
+    public $prefix = 'wp_';
+
+    public function prepare($query, ...$args) {
+        return vsprintf(str_replace('%s', "'%s'", $query), $args);
+    }
+
+    public function get_var($query) {
+        return null;
+    }
+
+    public function get_row($query) {
+        return null;
+    }
+
+    public function get_results($query) {
+        return [];
+    }
+
+    public function insert($table, $data) {
+        return 1;
+    }
+
+    public function update($table, $data, $where) {
+        return 1;
+    }
+
+    public function query($query) {
+        return 0;
+    }
+
+    public function get_charset_collate() {
+        return 'DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci';
+    }
+}
+
 global $wpdb;
-$wpdb = new stdClass();
-$wpdb->prefix = 'wp_';
-$wpdb->prepare = function($query, ...$args) {
-    return vsprintf(str_replace('%s', "'%s'", $query), $args);
-};
-$wpdb->get_var = function($query) {
-    return null;
-};
-$wpdb->get_row = function($query) {
-    return null;
-};
-$wpdb->get_results = function($query) {
-    return [];
-};
-$wpdb->insert = function($table, $data) {
-    return 1;
-};
-$wpdb->update = function($table, $data, $where) {
-    return 1;
-};
-$wpdb->query = function($query) {
-    return 0;
-};
+$wpdb = new MockWPDB();
 
 // Mock WP_Error class
 if (!class_exists('WP_Error')) {
@@ -177,6 +192,94 @@ if (!class_exists('WP_Error')) {
             }
             return isset($this->errors[$code][0]) ? $this->errors[$code][0] : '';
         }
+    }
+}
+
+// Mock add_action function
+if (!function_exists('add_action')) {
+    function add_action($tag, $function_to_add, $priority = 10, $accepted_args = 1) {
+        // Mock function
+    }
+}
+
+if (!function_exists('add_filter')) {
+    function add_filter($tag, $function_to_add, $priority = 10, $accepted_args = 1) {
+        // Mock function
+    }
+}
+
+if (!function_exists('wp_nonce_field')) {
+    function wp_nonce_field($action = -1, $name = "_wpnonce", $referer = true, $echo = true) {
+        $field = '<input type="hidden" name="' . $name . '" value="test_nonce" />';
+        if ($echo) {
+            echo $field;
+        }
+        return $field;
+    }
+}
+
+if (!function_exists('wp_verify_nonce')) {
+    function wp_verify_nonce($nonce, $action = -1) {
+        return $nonce === 'test_nonce' ? 1 : false;
+    }
+}
+
+if (!function_exists('wp_create_nonce')) {
+    function wp_create_nonce($action = -1) {
+        return 'test_nonce';
+    }
+}
+
+if (!function_exists('delete_transient')) {
+    function delete_transient($transient) {
+        return true;
+    }
+}
+
+if (!function_exists('wp_unslash')) {
+    function wp_unslash($value) {
+        return is_string($value) ? stripslashes($value) : $value;
+    }
+}
+
+if (!function_exists('absint')) {
+    function absint($maybeint) {
+        return abs(intval($maybeint));
+    }
+}
+
+if (!function_exists('wp_parse_args')) {
+    function wp_parse_args($args, $defaults = '') {
+        if (is_object($args)) {
+            $r = get_object_vars($args);
+        } elseif (is_array($args)) {
+            $r =& $args;
+        } else {
+            wp_parse_str($args, $r);
+        }
+
+        if (is_array($defaults)) {
+            return array_merge($defaults, $r);
+        }
+        return $r;
+    }
+}
+
+if (!function_exists('wp_parse_str')) {
+    function wp_parse_str($string, &$array) {
+        parse_str($string, $array);
+    }
+}
+
+if (!function_exists('wp_die')) {
+    function wp_die($message = '', $title = '', $args = array()) {
+        throw new Exception($message);
+    }
+}
+
+if (!function_exists('check_ajax_referer')) {
+    function check_ajax_referer($action = -1, $query_arg = false, $die = true) {
+        return true;
     }
 }
 
