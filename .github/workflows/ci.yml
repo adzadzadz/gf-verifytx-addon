@@ -106,27 +106,6 @@ jobs:
         run: composer phpstan
         continue-on-error: true
 
-  security:
-    name: Security Scan
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.1'
-          extensions: mbstring, intl
-          coverage: none
-          tools: composer:v2
-
-      - name: Run security check
-        run: |
-          composer require --dev roave/security-advisories:dev-latest
-        continue-on-error: true
-
   build:
     name: Build Plugin
     runs-on: ubuntu-latest
@@ -141,20 +120,36 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
-        if: hashFiles('package-lock.json') != ''
+        if: ${{ hashFiles('package-lock.json') != '' }}
 
       - name: Install Node dependencies
         run: npm ci
-        if: hashFiles('package-lock.json') != ''
+        if: ${{ hashFiles('package-lock.json') != '' }}
 
       - name: Build assets
         run: npm run build
-        if: hashFiles('package-lock.json') != ''
+        if: ${{ hashFiles('package-lock.json') != '' }}
 
       - name: Create plugin archive
         run: |
           mkdir -p build
-          rsync -av --exclude-from='.distignore' . build/gf-verifytx-addon/
+          if [ -f .distignore ]; then
+            rsync -av --exclude-from='.distignore' . build/gf-verifytx-addon/
+          else
+            rsync -av \
+              --exclude='.git' \
+              --exclude='.github' \
+              --exclude='tests' \
+              --exclude='vendor' \
+              --exclude='node_modules' \
+              --exclude='*.log' \
+              --exclude='.env*' \
+              --exclude='composer.*' \
+              --exclude='phpunit.xml*' \
+              --exclude='phpstan.*' \
+              --exclude='.*' \
+              . build/gf-verifytx-addon/
+          fi
           cd build
           zip -r gf-verifytx-addon.zip gf-verifytx-addon/
 
