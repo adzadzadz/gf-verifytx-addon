@@ -7,9 +7,18 @@ require_once dirname(__DIR__) . '/vendor/autoload.php';
 define('ABSPATH', dirname(__DIR__) . '/');
 
 // Define plugin constants
-define('GF_VERIFYTX_PLUGIN_PATH', dirname(__DIR__) . '/');
-define('GF_VERIFYTX_VERSION', '0.1.0');
-define('GF_VERIFYTX_MIN_GF_VERSION', '2.5');
+if (!defined('GF_VERIFYTX_PLUGIN_PATH')) {
+    define('GF_VERIFYTX_PLUGIN_PATH', dirname(__DIR__) . '/');
+}
+if (!defined('GF_VERIFYTX_VERSION')) {
+    define('GF_VERIFYTX_VERSION', '0.1.0');
+}
+if (!defined('GF_VERIFYTX_MIN_GF_VERSION')) {
+    define('GF_VERIFYTX_MIN_GF_VERSION', '2.5');
+}
+if (!defined('GF_VERIFYTX_PLUGIN_URL')) {
+    define('GF_VERIFYTX_PLUGIN_URL', 'http://example.com/wp-content/plugins/gf-verifytx-addon/');
+}
 
 // Mock WordPress functions
 if (!function_exists('__')) {
@@ -280,6 +289,88 @@ if (!function_exists('wp_die')) {
 if (!function_exists('check_ajax_referer')) {
     function check_ajax_referer($action = -1, $query_arg = false, $die = true) {
         return true;
+    }
+}
+
+if (!function_exists('plugin_dir_path')) {
+    function plugin_dir_path($file) {
+        return dirname($file) . '/';
+    }
+}
+
+if (!function_exists('plugin_dir_url')) {
+    function plugin_dir_url($file) {
+        return 'http://example.com/wp-content/plugins/' . basename(dirname($file)) . '/';
+    }
+}
+
+if (!function_exists('plugin_basename')) {
+    function plugin_basename($file) {
+        return basename(dirname($file)) . '/' . basename($file);
+    }
+}
+
+if (!function_exists('register_activation_hook')) {
+    function register_activation_hook($file, $callback) {
+        // Mock function
+    }
+}
+
+if (!function_exists('register_deactivation_hook')) {
+    function register_deactivation_hook($file, $callback) {
+        // Mock function
+    }
+}
+
+if (!function_exists('load_plugin_textdomain')) {
+    function load_plugin_textdomain($domain, $deprecated = false, $plugin_rel_path = false) {
+        return true;
+    }
+}
+
+if (!function_exists('dbDelta')) {
+    function dbDelta($queries) {
+        // Mock function - just return success
+        return ['created' => true];
+    }
+}
+
+// Mock Gravity Forms classes
+if (!class_exists('GFForms')) {
+    class GFForms {
+        public static function include_addon_framework() {
+            return true;
+        }
+        public static function get_page() {
+            return 'forms';
+        }
+    }
+}
+
+if (!class_exists('GFAddOn')) {
+    abstract class GFAddOn {
+        protected $_version;
+        protected $_min_gravityforms_version;
+        protected $_slug;
+        protected $_path;
+        protected $_full_path;
+        protected $_title;
+        protected $_short_title;
+
+        public function get_plugin_settings() {
+            return [];
+        }
+
+        public function get_form_settings($form) {
+            return [];
+        }
+
+        public function log_debug($message) {}
+        public function log_error($message) {}
+
+        public static function register($class_name) {
+            return true;
+        }
     }
 }
 
