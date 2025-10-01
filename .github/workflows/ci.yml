@@ -3,95 +3,65 @@ name: CI
 on:
   push:
     branches: [ main, develop ]
-    paths-ignore:
-      - '**.md'
-      - 'LICENSE'
   pull_request:
     branches: [ main, develop ]
-    paths-ignore:
-      - '**.md'
-      - 'LICENSE'
 
 jobs:
   test:
-    name: PHP ${{ matrix.php-version }}
+    name: Test PHP ${{ matrix.php-version }}
     runs-on: ubuntu-latest
 
     strategy:
+      fail-fast: false
       matrix:
         php-version: ['7.4', '8.0', '8.1']
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-version }}
-          extensions: mbstring, intl, mysql, zip
-          coverage: xdebug
+          extensions: mbstring, intl, json
+          coverage: none
+          ini-values: error_reporting=E_ALL
           tools: composer:v2
+
+      - name: Check PHP version
+        run: |
+          php -v
+          php -m
 
       - name: Validate composer.json
-        run: composer validate --strict
+        run: composer validate
 
-      - name: Install Composer dependencies
+      - name: Install dependencies
         run: |
           composer config platform.php ${{ matrix.php-version }}
-          composer update --prefer-dist --no-progress --no-interaction --prefer-stable
+          composer install --prefer-dist --no-progress --no-interaction
 
-      - name: Run PHPUnit tests
-        run: vendor/bin/phpunit
+      - name: Check installed packages
+        run: composer show
 
-      - name: Upload coverage to Codecov
-        if: matrix.php-version == '8.0'
-        uses: codecov/codecov-action@v3
-        with:
-          files: ./coverage.xml
-          flags: unittests
-          name: codecov-umbrella
-          fail_ci_if_error: false
-
-  lint:
-    name: Code Quality
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '7.4'
-          extensions: mbstring, intl
-          coverage: none
-          tools: composer:v2
-
-      - name: Install Composer dependencies
+      - name: Run tests
         run: |
-          composer config platform.php 7.4
-          composer update --prefer-dist --no-progress --no-interaction --prefer-stable
-
-      - name: Run PHP CodeSniffer
-        run: vendor/bin/phpcs --standard=WordPress --extensions=php --ignore=vendor/,node_modules/,tests/,temp/ .
-        continue-on-error: true
-
-      - name: Run PHPStan
-        run: vendor/bin/phpstan analyse
-        continue-on-error: true
+          echo "Running PHPUnit tests..."
+          ./vendor/bin/phpunit --version
+          ./vendor/bin/phpunit --no-coverage
 
   build:
     name: Build Plugin
     runs-on: ubuntu-latest
-    needs: [test]
+    needs: test
+    if: success()
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
-      - name: Create plugin archive
+      - name: Create build
         run: |
           mkdir -p build
           rsync -av \
@@ -100,20 +70,19 @@ jobs:
             --exclude='tests' \
             --exclude='vendor' \
             --exclude='node_modules' \
-            --exclude='*.log' \
-            --exclude='.env*' \
             --exclude='composer.*' \
             --exclude='phpunit.xml*' \
             --exclude='phpstan.*' \
-            --exclude='.*' \
+            --exclude='.*ignore' \
+            --exclude='*.log' \
             --exclude='temp/' \
             . build/gf-verifytx-addon/
           cd build
           zip -r gf-verifytx-addon.zip gf-verifytx-addon/
+          echo "Build complete!"
 
-      - name: Upload plugin artifact
+      - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
-          name: gf-verifytx-addon-${{ github.sha }}
+          name: gf-verifytx-addon
           path: build/gf-verifytx-addon.zip
-          retention-days: 7

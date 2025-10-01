@@ -211,14 +211,34 @@ if ( ! function_exists( 'wp_remote_retrieve_response_code' ) ) {
 if ( ! function_exists( 'add_query_arg' ) ) {
 	function add_query_arg( $args, $url = '' ) {
 		if ( empty( $url ) ) {
-			$url = $_SERVER['REQUEST_URI'];
+			$url = isset( $_SERVER['REQUEST_URI'] ) ? $_SERVER['REQUEST_URI'] : '';
+		}
+		if ( empty( $url ) ) {
+			return '';
 		}
 		$parsed = parse_url( $url );
+		if ( ! $parsed ) {
+			return $url;
+		}
 		$query = isset( $parsed['query'] ) ? $parsed['query'] : '';
 		parse_str( $query, $params );
 		$params = array_merge( $params, $args );
-		$parsed['query'] = http_build_query( $params );
-		return $parsed['scheme'] . '://' . $parsed['host'] . $parsed['path'] . '?' . $parsed['query'];
+		$new_query = http_build_query( $params );
+
+		$result = '';
+		if ( isset( $parsed['scheme'] ) ) {
+			$result .= $parsed['scheme'] . '://';
+		}
+		if ( isset( $parsed['host'] ) ) {
+			$result .= $parsed['host'];
+		}
+		if ( isset( $parsed['path'] ) ) {
+			$result .= $parsed['path'];
+		}
+		if ( ! empty( $new_query ) ) {
+			$result .= '?' . $new_query;
+		}
+		return $result;
 	}
 }
 
