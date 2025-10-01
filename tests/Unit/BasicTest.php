@@ -45,7 +45,9 @@ class BasicTest extends TestCase {
 	 * Test API client class exists.
 	 */
 	public function test_api_client_class_exists() {
-		require_once GF_VERIFYTX_PLUGIN_PATH . 'includes/class-api-client.php';
+		if ( ! class_exists( 'GF_VerifyTX_API_Client' ) ) {
+			require_once GF_VERIFYTX_PLUGIN_PATH . 'includes/class-api-client.php';
+		}
 		$this->assertTrue( class_exists( 'GF_VerifyTX_API_Client' ) );
 	}
 
@@ -77,10 +79,14 @@ class BasicTest extends TestCase {
 	 * Test that class can be loaded.
 	 */
 	public function test_class_loading() {
-		require_once GF_VERIFYTX_PLUGIN_PATH . 'includes/class-api-client.php';
+		if ( ! class_exists( 'GF_VerifyTX_API_Client' ) ) {
+			require_once GF_VERIFYTX_PLUGIN_PATH . 'includes/class-api-client.php';
+		}
 		$this->assertTrue( class_exists( 'GF_VerifyTX_API_Client' ) );
 
-		require_once GF_VERIFYTX_PLUGIN_PATH . 'includes/class-verification.php';
+		if ( ! class_exists( 'GF_VerifyTX_Verification' ) ) {
+			require_once GF_VERIFYTX_PLUGIN_PATH . 'includes/class-verification.php';
+		}
 		$this->assertTrue( class_exists( 'GF_VerifyTX_Verification' ) );
 	}
 }

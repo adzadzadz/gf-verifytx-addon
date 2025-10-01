@@ -6,9 +6,17 @@
  */
 
 // Define test environment constants.
-define( 'GF_VERIFYTX_TESTS', true );
-define( 'GF_VERIFYTX_PLUGIN_FILE', dirname( __DIR__ ) . '/gf-verifytx-addon.php' );
-define( 'GF_VERIFYTX_PLUGIN_PATH', dirname( __DIR__ ) . '/' );
+if ( ! defined( 'GF_VERIFYTX_TESTS' ) ) {
+	define( 'GF_VERIFYTX_TESTS', true );
+}
+
+if ( ! defined( 'GF_VERIFYTX_PLUGIN_FILE' ) ) {
+	define( 'GF_VERIFYTX_PLUGIN_FILE', dirname( __DIR__ ) . '/gf-verifytx-addon.php' );
+}
+
+if ( ! defined( 'GF_VERIFYTX_PLUGIN_PATH' ) ) {
+	define( 'GF_VERIFYTX_PLUGIN_PATH', dirname( __DIR__ ) . '/' );
+}
 
 // Load Composer autoloader.
 $composer_autoload = dirname( __DIR__ ) . '/vendor/autoload.php';
@@ -391,11 +399,7 @@ if ( ! defined( 'GF_VERIFYTX_PLUGIN_BASENAME' ) ) {
 	define( 'GF_VERIFYTX_PLUGIN_BASENAME', 'gf-verifytx-addon/gf-verifytx-addon.php' );
 }
 
-// Load plugin files for testing.
-require_once GF_VERIFYTX_PLUGIN_PATH . 'includes/class-api-client.php';
-require_once GF_VERIFYTX_PLUGIN_PATH . 'includes/class-verification.php';
-require_once GF_VERIFYTX_PLUGIN_PATH . 'includes/class-field-verifytx.php';
-require_once GF_VERIFYTX_PLUGIN_PATH . 'class-gf-verifytx.php';
+// Don't load plugin files here - let tests load them as needed to avoid conflicts
 
 echo "GF VerifyTX Addon Test Suite\n";
 echo "=============================\n\n";
