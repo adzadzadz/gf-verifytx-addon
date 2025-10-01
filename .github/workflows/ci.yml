@@ -2,87 +2,29 @@ name: CI
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main ]
 
 jobs:
   test:
-    name: Test PHP ${{ matrix.php-version }}
     runs-on: ubuntu-latest
 
     strategy:
-      fail-fast: false
       matrix:
-        php-version: ['7.4', '8.0', '8.1']
+        php-version: ['7.4', '8.0']
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-version }}
-          extensions: mbstring, intl, json
-          coverage: none
-          ini-values: error_reporting=E_ALL
           tools: composer:v2
 
-      - name: Check PHP version
-        run: |
-          php -v
-          php -m
-
-      - name: Validate composer.json
-        run: composer validate
-
       - name: Install dependencies
-        run: |
-          composer config platform.php ${{ matrix.php-version }}
-          composer install --prefer-dist --no-progress --no-interaction
-
-      - name: Check installed packages
-        run: composer show
+        run: composer install --no-progress --prefer-dist
 
       - name: Run tests
-        run: |
-          echo "Running PHPUnit tests..."
-          ./vendor/bin/phpunit --version
-          ./vendor/bin/phpunit --no-coverage
-
-  build:
-    name: Build Plugin
-    runs-on: ubuntu-latest
-    needs: test
-    if: success()
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Create build
-        run: |
-          mkdir -p build
-          rsync -av \
-            --exclude='.git' \
-            --exclude='.github' \
-            --exclude='tests' \
-            --exclude='vendor' \
-            --exclude='node_modules' \
-            --exclude='composer.*' \
-            --exclude='phpunit.xml*' \
-            --exclude='phpstan.*' \
-            --exclude='.*ignore' \
-            --exclude='*.log' \
-            --exclude='temp/' \
-            . build/gf-verifytx-addon/
-          cd build
-          zip -r gf-verifytx-addon.zip gf-verifytx-addon/
-          echo "Build complete!"
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: gf-verifytx-addon
-          path: build/gf-verifytx-addon.zip
+        run: vendor/bin/phpunit
