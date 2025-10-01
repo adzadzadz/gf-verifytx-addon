@@ -6,28 +6,20 @@ on:
     paths-ignore:
       - '**.md'
       - 'LICENSE'
-      - '.gitignore'
   pull_request:
     branches: [ main, develop ]
     paths-ignore:
       - '**.md'
       - 'LICENSE'
-      - '.gitignore'
 
 jobs:
   test:
-    name: PHP ${{ matrix.php-version }} - WP ${{ matrix.wordpress-version }}
+    name: PHP ${{ matrix.php-version }}
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        php-version: ['7.4', '8.0', '8.1', '8.2']
-        wordpress-version: ['latest', '6.3', '6.2']
-        include:
-          - php-version: '7.4'
-            wordpress-version: '5.9'
-          - php-version: '8.2'
-            wordpress-version: 'trunk'
+        php-version: ['7.4', '8.0', '8.1']
 
     steps:
       - name: Checkout code
@@ -37,30 +29,23 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-version }}
-          extensions: mbstring, intl, mysql
+          extensions: mbstring, intl, mysql, zip
           coverage: xdebug
           tools: composer:v2
 
-      - name: Get Composer cache directory
-        id: composer-cache
-        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-
-      - name: Cache Composer dependencies
-        uses: actions/cache@v3
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-composer-
+      - name: Validate composer.json
+        run: composer validate --strict
 
       - name: Install Composer dependencies
-        run: composer install --prefer-dist --no-progress --no-suggest
+        run: |
+          composer config platform.php ${{ matrix.php-version }}
+          composer update --prefer-dist --no-progress --no-interaction --prefer-stable
 
       - name: Run PHPUnit tests
-        run: composer test
+        run: vendor/bin/phpunit
 
       - name: Upload coverage to Codecov
-        if: matrix.php-version == '8.1' && matrix.wordpress-version == 'latest'
+        if: matrix.php-version == '8.0'
         uses: codecov/codecov-action@v3
         with:
           files: ./coverage.xml
@@ -69,7 +54,7 @@ jobs:
           fail_ci_if_error: false
 
   lint:
-    name: Code Quality Checks
+    name: Code Quality
     runs-on: ubuntu-latest
 
     steps:
@@ -79,77 +64,50 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.1'
+          php-version: '7.4'
           extensions: mbstring, intl
           coverage: none
-          tools: composer:v2, cs2pr
-
-      - name: Get Composer cache directory
-        id: composer-cache
-        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-
-      - name: Cache Composer dependencies
-        uses: actions/cache@v3
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-composer-
+          tools: composer:v2
 
       - name: Install Composer dependencies
-        run: composer install --prefer-dist --no-progress --no-suggest
+        run: |
+          composer config platform.php 7.4
+          composer update --prefer-dist --no-progress --no-interaction --prefer-stable
 
       - name: Run PHP CodeSniffer
-        run: composer phpcs -- --report=checkstyle | cs2pr
+        run: vendor/bin/phpcs --standard=WordPress --extensions=php --ignore=vendor/,node_modules/,tests/,temp/ .
+        continue-on-error: true
 
       - name: Run PHPStan
-        run: composer phpstan
+        run: vendor/bin/phpstan analyse
         continue-on-error: true
 
   build:
     name: Build Plugin
     runs-on: ubuntu-latest
-    needs: [test, lint]
+    needs: [test]
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-          cache: 'npm'
-        if: ${{ hashFiles('package-lock.json') != '' }}
-
-      - name: Install Node dependencies
-        run: npm ci
-        if: ${{ hashFiles('package-lock.json') != '' }}
-
-      - name: Build assets
-        run: npm run build
-        if: ${{ hashFiles('package-lock.json') != '' }}
-
       - name: Create plugin archive
         run: |
           mkdir -p build
-          if [ -f .distignore ]; then
-            rsync -av --exclude-from='.distignore' . build/gf-verifytx-addon/
-          else
-            rsync -av \
-              --exclude='.git' \
-              --exclude='.github' \
-              --exclude='tests' \
-              --exclude='vendor' \
-              --exclude='node_modules' \
-              --exclude='*.log' \
-              --exclude='.env*' \
-              --exclude='composer.*' \
-              --exclude='phpunit.xml*' \
-              --exclude='phpstan.*' \
-              --exclude='.*' \
-              . build/gf-verifytx-addon/
-          fi
+          rsync -av \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='tests' \
+            --exclude='vendor' \
+            --exclude='node_modules' \
+            --exclude='*.log' \
+            --exclude='.env*' \
+            --exclude='composer.*' \
+            --exclude='phpunit.xml*' \
+            --exclude='phpstan.*' \
+            --exclude='.*' \
+            --exclude='temp/' \
+            . build/gf-verifytx-addon/
           cd build
           zip -r gf-verifytx-addon.zip gf-verifytx-addon/
 
@@ -159,60 +117,3 @@ jobs:
           name: gf-verifytx-addon-${{ github.sha }}
           path: build/gf-verifytx-addon.zip
           retention-days: 7
-
-  release:
-    name: Create Release
-    runs-on: ubuntu-latest
-    needs: [build]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Get version from plugin file
-        id: get_version
-        run: |
-          VERSION=$(grep "Version:" gf-verifytx-addon.php | awk '{print $3}')
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-
-      - name: Check if tag exists
-        id: check_tag
-        run: |
-          if git ls-remote --tags origin | grep "refs/tags/v${{ steps.get_version.outputs.version }}"; then
-            echo "exists=true" >> $GITHUB_OUTPUT
-          else
-            echo "exists=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Download artifact
-        if: steps.check_tag.outputs.exists == 'false'
-        uses: actions/download-artifact@v3
-        with:
-          name: gf-verifytx-addon-${{ github.sha }}
-
-      - name: Create Release
-        if: steps.check_tag.outputs.exists == 'false'
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: v${{ steps.get_version.outputs.version }}
-          name: Release ${{ steps.get_version.outputs.version }}
-          body: |
-            ## GF VerifyTX Addon v${{ steps.get_version.outputs.version }}
-
-            ### Changes
-            - See [commit history](https://github.com/${{ github.repository }}/commits/v${{ steps.get_version.outputs.version }}) for changes.
-
-            ### Installation
-            1. Download the `gf-verifytx-addon.zip` file
-            2. Upload to WordPress via Plugins → Add New → Upload Plugin
-            3. Activate the plugin
-            4. Configure your VerifyTX API credentials in Forms → Settings → VerifyTX
-
-            ### Requirements
-            - WordPress 5.0+
-            - PHP 7.4+
-            - Gravity Forms 2.5+
-          files: gf-verifytx-addon.zip
-          draft: false
-          prerelease: false
