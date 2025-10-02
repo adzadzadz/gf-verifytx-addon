@@ -1,0 +1,117 @@
+/**
+ * GF VerifyTX Admin Styles
+ */
+
+/* Field button icon in the form editor */
+.gform-add-field__button[data-type="verifytx"] .gform-icon--check::before,
+.gform-field-type-verifytx .gform-icon--check::before {
+    content: "\f147"; /* Dashicon checkmark */
+    font-family: dashicons;
+}
+
+/* Alternative: Use dashicon shield for insurance/security */
+.gform-add-field__button[data-type="verifytx"] .dashicons-shield::before,
+.gform-field-type-verifytx .dashicons-shield::before {
+    content: "\f332";
+    font-family: dashicons;
+}
+
+/* Field preview in form editor */
+.gf-verifytx-preview {
+    padding: 10px;
+    background: #f9f9f9;
+    border: 1px dashed #ccc;
+    border-radius: 4px;
+}
+
+.gf-verifytx-status-message {
+    margin-top: 10px;
+    font-style: italic;
+    color: #666;
+    font-size: 13px;
+}
+
+/* Entry detail view styles */
+.gf-verifytx-results-detail {
+    background: #fff;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.gf-verifytx-results-detail > div {
+    margin-bottom: 10px;
+}
+
+.gf-verifytx-results-detail > div:last-child {
+    margin-bottom: 0;
+}
+
+.verification-status {
+    padding: 8px;
+    border-radius: 3px;
+}
+
+.verification-status.status-active {
+    background-color: #d4edda;
+    border-left: 4px solid #28a745;
+}
+
+.verification-status.status-inactive {
+    background-color: #f8d7da;
+    border-left: 4px solid #dc3545;
+}
+
+.verification-status.status-unknown {
+    background-color: #fff3cd;
+    border-left: 4px solid #ffc107;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+}
+
+.verification-status.status-active .status-badge {
+    background-color: #28a745;
+    color: #fff;
+}
+
+.verification-status.status-inactive .status-badge {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+.verification-status.status-unknown .status-badge {
+    background-color: #ffc107;
+    color: #333;
+}
+
+.benefits-list {
+    margin: 10px 0 0 20px;
+    padding: 0;
+}
+
+.benefit-item {
+    margin-bottom: 8px;
+    list-style-type: disc;
+}
+
+.benefit-type {
+    font-weight: 600;
+    color: #333;
+}
+
+/* Not verified states */
+.gf-verifytx-no-results,
+.gf-verifytx-not-verified {
+    padding: 10px;
+    background-color: #f8f8f8;
+    color: #666;
+    font-style: italic;
+    border-radius: 3px;
+}

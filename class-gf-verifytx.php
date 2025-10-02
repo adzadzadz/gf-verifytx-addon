@@ -616,6 +616,14 @@ class GF_VerifyTX extends GFAddOn {
 					array( 'field_types' => array( 'text', 'select' ) ),
 				),
 			),
+			array(
+				'handle'  => 'gf_verifytx_admin',
+				'src'     => GF_VERIFYTX_PLUGIN_URL . 'assets/css/admin.css',
+				'version' => $this->_version,
+				'enqueue' => array(
+					array( 'admin_page' => array( 'form_editor', 'entry_detail' ) ),
+				),
+			),
 		);
 
 		return array_merge( parent::styles(), $styles );

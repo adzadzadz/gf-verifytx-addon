@@ -32,7 +32,7 @@ class GF_Field_VerifyTX extends GF_Field {
 		return array(
 			'group' => 'advanced_fields',
 			'text'  => __( 'Insurance Verification', 'gf-verifytx' ),
-			'icon'  => 'gform-icon--shield',
+			'icon'  => 'dashicons-shield-alt',
 		);
 	}
 
